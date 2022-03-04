@@ -15,15 +15,18 @@ def check_cl_args():
 # Returns an int [len of content/name]
 def get_name_content_len(data) -> int:
     count = 0
-    while data[count] == 0:
-        count += 1
+    if len(data) != 0:
+        while data[count] == 0:
+            count += 1
 
     return count
 
 
 # nc = Name or Content
 def get_name_content(data, nc_len) -> bytearray:
-    return bytearray(bytes(data[:nc_len]))
+    if nc_len != 0:  # content or name are not empty
+        return bytearray(bytes(data[:nc_len]))
+    return bytearray()
 
 
 # user is trying to archive
@@ -75,15 +78,18 @@ elif 'unarch' in sys.argv:
 
         # Get the len of the content and remove from data
         content_len = get_name_content_len(archiver_file_data)
-        archiver_file_data = archiver_file_data[content_len:]
+        if content_len != 0:
+            archiver_file_data = archiver_file_data[content_len:]
 
-        # Get the content of the file and remove from data
-        content = get_name_content(archiver_file_data, content_len)
-        archiver_file_data = archiver_file_data[content_len:]
+            # Get the content of the file and remove from data
+            content = get_name_content(archiver_file_data, content_len)
+            archiver_file_data = archiver_file_data[content_len:]
 
         # Create new file and write the data
         new_file = open(file_name.decode(), 'wb')
-        new_file.write(content)
+        # Check that there is content
+        if content_len != 0:
+            new_file.write(content)
         new_file.close()
 
     # Remove archiver
