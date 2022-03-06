@@ -14,12 +14,11 @@ def check_cl_args():
 # Should only be used when using unarch
 # Returns an int [len of content/name]
 def get_name_content_len(data) -> int:
-    count = 0
+    name_content_len = 0
     if len(data) != 0:
-        while data[count] == 0:
-            count += 1
+        name_content_len = int.from_bytes(data[:4], 'big')
 
-    return count
+    return name_content_len
 
 
 # nc = Name or Content
@@ -42,7 +41,8 @@ if 'arch' in sys.argv:
             b_file_name_size = len(b_file_name)  # Get length of name in bytes
 
             # Create file contents as byte arrays
-            file_content = bytearray(b_file_name_size) + bytearray(b_file_name) + bytearray(b_file_size) + bytearray(
+            file_content = bytearray(b_file_name_size.to_bytes(4, "big")) + bytearray(b_file_name) + bytearray(
+                b_file_size.to_bytes(4, "big")) + bytearray(
                 b_file.read())
 
             archiver_file.write(file_content)
@@ -70,7 +70,7 @@ elif 'unarch' in sys.argv:
     while len(archiver_file_data) != 0:
         # Get the len of the name and remove from data
         name_len = get_name_content_len(archiver_file_data)
-        archiver_file_data = archiver_file_data[name_len:]
+        archiver_file_data = archiver_file_data[4:]
 
         # Get the name of file and remove from data
         file_name = get_name_content(archiver_file_data, name_len)
@@ -79,7 +79,7 @@ elif 'unarch' in sys.argv:
         # Get the len of the content and remove from data
         content_len = get_name_content_len(archiver_file_data)
         if content_len != 0:
-            archiver_file_data = archiver_file_data[content_len:]
+            archiver_file_data = archiver_file_data[4:]
 
             # Get the content of the file and remove from data
             content = get_name_content(archiver_file_data, content_len)
